@@ -4,7 +4,7 @@
 Game::Game(int virtualWidth, int virtualHeight)
   : screenWidth(virtualWidth),
     screenHeight(virtualHeight),
-    currentState(GameState::PauseMenu),
+    currentState(GameState::Playing),
     logoAlpha(0.0f),
     logoTimer(0.0f),
     pauseSelection(0),
@@ -19,7 +19,6 @@ Game::Game(int virtualWidth, int virtualHeight)
   camera.zoom = 1.0f;
 
   tileset = LoadTexture("assets/8_cave.png");
-  
 }
 
 bool Game::ShouldQuit() const {
@@ -148,6 +147,35 @@ void Game::UpdateTitle() {
   }
 }
 
+bool Game::IsTilePassable(int tile) const {
+  switch (tile) {
+    case TILE_FLOOR_DIRT:
+    case TILE_FLOOR_DIRT_2:
+      return true;
+
+    case TILE_PLANT:
+    case TILE_PLANT_2:
+    case TILE_MUSHROOM_RED:
+    case TILE_MUSHROOM_PURPLE:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+bool Game::IsWorldPositionPassable(Vector2 worldPos) const {
+  int tileX = (int)(worldPos.x / tileSize);
+  int tileY = (int)(worldPos.y / tileSize);
+
+  if (tileX < 0 || tileX >= mapWidth || tileY < 0 || tileY >= mapHeight) {
+    return false;
+  }
+
+  int tile = tileMap[tileY][tileX];
+  return IsTilePassable(tile);
+}
+
 // UpdateTitle and DrawTitle are pretty long, so I moved the button drawing code to a separate function
 bool Game::MakeButton(const std::string& text, Rectangle rect, bool selected) {
   Vector2 mouse = GetVirtualMouse();
@@ -180,7 +208,23 @@ void Game::UpdatePlaying() {
   }
 
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-    player.SetTarget(GetVirtualMouseWorld());
+    Vector2 target = GetVirtualMouseWorld();
+
+    int tileX = (int)(target.x / tileSize);
+    int tileY = (int)(target.y / tileSize);
+
+    if (tileX >= 0 && tileX < mapWidth && tileY >= 0 && tileY < mapHeight) {
+      int tile = tileMap[tileY][tileX];
+
+      if (IsTilePassable(tile)) {
+        Vector2 tileCenter = {
+          tileX * tileSize + tileSize / 2.0f,
+          tileY * tileSize + tileSize / 2.0f
+        };
+
+        player.SetTarget(tileCenter);
+      }
+    }
   }
 
   player.Update();
@@ -191,6 +235,27 @@ void Game::UpdatePlaying() {
 
   camera.target.x += (playerPos.x - camera.target.x) * followSpeed * dt;
   camera.target.y += (playerPos.y - camera.target.y) * followSpeed * dt;
+}
+
+
+void Game::DrawTilesetDebug(){
+  DrawTexture(tileset, 0, 0, WHITE);
+
+  int tilesPerRow = tileset.width / tileSize;
+  int tilesPerCol = tileset.height / tileSize;
+  int index = 0;
+
+  for(int y = 0; y < tilesPerCol; y++){
+    for(int x = 0; x < tilesPerRow; x++){
+      int drawX = x * tileSize;
+      int drawY = y * tileSize;
+
+      DrawRectangleLines(drawX, drawY, tileSize, tileSize, RED);
+      DrawText(TextFormat("%d", index), drawX + 4, drawY + 4, 10, YELLOW);
+
+      index++;
+    }
+  }
 }
 
 void Game::DrawTileMap() {
@@ -228,20 +293,19 @@ void Game::DrawTileMap() {
 
 void Game::DrawPlaying() {
   ClearBackground(BLACK);
-
   BeginMode2D(camera);
-
     DrawTileMap();
-
     DrawCircle(0, 0, 10, RED);
     DrawLine(-40, 0, 40, 0, RED);
     DrawLine(0, -40, 0, 40, RED);
-
     player.Draw();
-
   EndMode2D();
-
 }
+
+// void Game::DrawPlaying() {
+//   ClearBackground(BLACK);
+//   DrawTilesetDebug();
+// }
 
 void Game::UpdatePauseMenu() {
   Rectangle resumeButton = {screenWidth / 2.0f - 100.0f, 190.0f, 200.0f, 50.0f};
