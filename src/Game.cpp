@@ -17,11 +17,16 @@ Game::Game(int virtualWidth, int virtualHeight)
   camera.offset = {(float)screenWidth / 2.0f, (float)screenHeight / 2.0f};
   camera.rotation = 0.0f;
   camera.zoom = 1.0f;
+
+  tileset = LoadTexture("assets/8_cave.png");
+  
 }
 
 bool Game::ShouldQuit() const {
   return shouldQuit;
 }
+
+
 
 void Game::Update() {
   switch (currentState) {
@@ -188,40 +193,54 @@ void Game::UpdatePlaying() {
   camera.target.y += (playerPos.y - camera.target.y) * followSpeed * dt;
 }
 
+void Game::DrawTileMap() {
+  int tilesPerRow = tileset.width / tileSize;
+
+  for (int y = 0; y < mapHeight; y++) {
+    for (int x = 0; x < mapWidth; x++) {
+      int tileIndex = tileMap[y][x];
+
+      Rectangle source = {
+        (float)((tileIndex % tilesPerRow) * tileSize),
+        (float)((tileIndex / tilesPerRow) * tileSize),
+        (float)tileSize,
+        (float)tileSize
+      };
+
+      Rectangle dest = {
+        (float)(x * tileSize),
+        (float)(y * tileSize),
+        (float)tileSize,
+        (float)tileSize
+      };
+
+      DrawTexturePro(
+        tileset,
+        source,
+        dest,
+        {0.0f, 0.0f},
+        0.0f,
+        WHITE
+      );
+    }
+  }
+}
+
 void Game::DrawPlaying() {
   ClearBackground(BLACK);
 
   BeginMode2D(camera);
 
-    // world background
-    DrawRectangle(-2000, -2000, 4000, 4000, DARKGREEN);
+    DrawTileMap();
 
-    // simple grid / tiles
-    const int tileSize = 64;
-
-    for (int x = -2000; x <= 2000; x += tileSize) {
-      for (int y = -2000; y <= 2000; y += tileSize) {
-        Color tileColor = ((x / tileSize + y / tileSize) % 2 == 0)
-          ? Color{60, 90, 60, 255}
-          : Color{70, 100, 70, 255};
-
-        DrawRectangle(x, y, tileSize, tileSize, tileColor);
-        DrawRectangleLines(x, y, tileSize, tileSize, Fade(BLACK, 0.2f));
-      }
-    }
-
-    // origin marker
     DrawCircle(0, 0, 10, RED);
     DrawLine(-40, 0, 40, 0, RED);
     DrawLine(0, -40, 0, 40, RED);
 
-    // player
     player.Draw();
 
   EndMode2D();
 
-  DrawText("Click to move", 20, 20, 20, WHITE);
-  DrawText("Press ESC for menu", 20, 50, 20, WHITE);
 }
 
 void Game::UpdatePauseMenu() {
