@@ -4,12 +4,17 @@
 Game::Game(int virtualWidth, int virtualHeight)
   : screenWidth(virtualWidth),
     screenHeight(virtualHeight),
-    currentState(GameState::Logo),
+    currentState(GameState::Title),
     logoAlpha(0.0f),
     logoTimer(0.0f),
     pauseSelection(0) {
-  logo = LoadTexture("assets/logo_2.png");
-  title = LoadTexture("assets/title_screen_2.png");
+  logo = LoadTexture("assets/logo.png");
+  title = LoadTexture("assets/title_screen.png");
+  shouldQuit = false;
+}
+
+bool Game::ShouldQuit() const {
+  return shouldQuit;
 }
 
 void Game::Update() {
@@ -83,6 +88,25 @@ void Game::DrawLogo() {
   DrawTextureEx(logo, {x, y}, 0.0f, scale, Fade(WHITE, logoAlpha));
 }
 
+void Game::DrawTitle() {
+  ClearBackground(BLACK);
+
+  DrawTexturePro(
+    title,
+    (Rectangle){0, 0, (float)title.width, (float)title.height},
+    (Rectangle){0, 0, (float)screenWidth, (float)screenHeight},
+    (Vector2){0, 0},
+    0.0f,
+    WHITE
+  );
+
+  Rectangle playButton = {screenWidth / 2.0f - 100.0f, 260.0f, 200.0f, 50.0f};
+  MakeButton("PLAY", playButton, false);
+
+  Rectangle exitButton = {screenWidth / 2.0f - 100.0f, 320.0f, 200.0f, 50.0f};
+  MakeButton("EXIT", exitButton, false);
+}
+
 void Game::UpdateTitle() {
   if (IsKeyPressed(KEY_ENTER)) {
     ResetGame();
@@ -96,36 +120,40 @@ void Game::UpdateTitle() {
     50.0f
   };
 
+  Rectangle exitButton = {screenWidth / 2.0f - 100.0f, 320.0f, 200.0f, 50.0f};
+
   Vector2 mouse = GetVirtualMouse();
 
   if (CheckCollisionPointRec(mouse, playButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
     ResetGame();
     currentState = GameState::Playing;
+  } else if( CheckCollisionPointRec(mouse, exitButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ){
+    shouldQuit = true;
   }
 }
 
-void Game::DrawTitle() {
-  ClearBackground(BLACK);
+// UpdateTitle and DrawTitle are pretty long, so I moved the button drawing code to a separate function
+bool Game::MakeButton(const std::string& text, Rectangle rect, bool selected) {
+  Vector2 mouse = GetVirtualMouse();
+  bool hovered = CheckCollisionPointRec(mouse, rect);
+  bool clicked = hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 
-  DrawTexturePro(
-    title,
-    (Rectangle){0, 0, (float)title.width, (float)title.height},
-    (Rectangle){0, 0, (float)screenWidth, (float)screenHeight},
-    (Vector2){0, 0},
-    0.0f,
-    WHITE
-  );
+  Color fillColor = hovered ? Fade(BLACK, 0.82f) : Fade(BLACK, 0.65f);
+  Color borderColor = hovered ? YELLOW : (selected ? YELLOW : GRAY);
+  Color textColor = hovered ? YELLOW : (selected ? YELLOW : RAYWHITE);
 
-  Rectangle playButton = {
-    screenWidth / 2.0f - 100.0f,
-    260.0f,
-    200.0f,
-    50.0f
-  };
+  DrawRectangleRec(rect, fillColor);
+  DrawRectangleLinesEx(rect, 2.0f, borderColor);
 
-  DrawRectangleRec(playButton, Fade(BLACK, 0.65f));
-  DrawRectangleLinesEx(playButton, 2.0f, GRAY);
-  DrawText("PLAY", playButton.x + 60, playButton.y + 12, 28, RAYWHITE);
+  int fontSize = 28;
+  int textWidth = MeasureText(text.c_str(), fontSize);
+
+  float textX = rect.x + (rect.width - textWidth) / 2.0f;
+  float textY = rect.y + (rect.height - fontSize) / 2.0f;
+
+  DrawText(text.c_str(), (int)textX, (int)textY, fontSize, textColor);
+
+  return clicked;
 }
 
 void Game::UpdatePlaying() {

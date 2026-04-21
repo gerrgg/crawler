@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "raylib.h"
+#include <string>
 
 enum class GameState {
   Logo,
@@ -17,6 +18,9 @@ public:
   void Update();
   void Draw();
 
+  bool shouldQuit;
+  bool ShouldQuit() const;
+
 private:
   int screenWidth;
   int screenHeight;
@@ -31,7 +35,11 @@ private:
 
   int pauseSelection;
 
+  
+
   Vector2 GetVirtualMouse() const;
+
+  bool MakeButton(const std::string& text, Rectangle rect, bool selected);
 
   void UpdateLogo();
   void UpdateTitle();
