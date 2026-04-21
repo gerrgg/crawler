@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/raylib_starter.dir/src/main.cpp.o CMakeFiles/raylib_starter.dir/src/Game.cpp.o CMakeFiles/raylib_starter.dir/src/Player.cpp.o -o raylib_starter  _deps/raylib-build/raylib/libraylib.a -lm -lpthread /usr/lib/x86_64-linux-gnu/libOpenGL.so /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libGLU.so /usr/lib/x86_64-linux-gnu/librt.a -lm -ldl 
