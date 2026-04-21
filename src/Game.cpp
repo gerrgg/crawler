@@ -4,10 +4,11 @@
 Game::Game(int virtualWidth, int virtualHeight)
   : screenWidth(virtualWidth),
     screenHeight(virtualHeight),
-    currentState(GameState::Title),
+    currentState(GameState::PauseMenu),
     logoAlpha(0.0f),
     logoTimer(0.0f),
-    pauseSelection(0) {
+    pauseSelection(0),
+    player(virtualWidth / 2.0f, virtualHeight / 2.0f) {
   logo = LoadTexture("assets/logo.png");
   title = LoadTexture("assets/title_screen.png");
   shouldQuit = false;
@@ -163,19 +164,38 @@ void Game::UpdatePlaying() {
     return;
   }
 
-  // actual gameplay update here
+  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    player.SetTarget(GetVirtualMouse());
+  }
+
+  player.Update();
 }
 
 void Game::DrawPlaying() {
   ClearBackground(DARKGREEN);
 
-  DrawText("Gameplay running...", 20, 20, 30, WHITE);
-  DrawText("Press ESC for menu", 20, 60, 20, WHITE);
+  player.Draw();
 
-  // actual gameplay draw here
+  DrawText("Gameplay running...", 20, 20, 30, WHITE);
+  DrawText("Click to move", 20, 60, 20, WHITE);
+  DrawText("Press ESC for menu", 20, 90, 20, WHITE);
 }
 
 void Game::UpdatePauseMenu() {
+  Rectangle resumeButton = {screenWidth / 2.0f - 100.0f, 190.0f, 200.0f, 50.0f};
+  Rectangle titleButton = {screenWidth / 2.0f - 100.0f, 250.0f, 200.0f, 50.0f};
+  Rectangle exitButton = {screenWidth / 2.0f - 100.0f, 310.0f, 200.0f, 50.0f};
+
+  Vector2 mouse = GetVirtualMouse();
+
+  bool resumeHovered = CheckCollisionPointRec(mouse, resumeButton);
+  bool titleHovered = CheckCollisionPointRec(mouse, titleButton);
+  bool exitHovered = CheckCollisionPointRec(mouse, exitButton);
+
+  if (resumeHovered) pauseSelection = 0;
+  if (titleHovered) pauseSelection = 1;
+  if (exitHovered) pauseSelection = 2;
+
   if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
     pauseSelection--;
   }
@@ -184,14 +204,21 @@ void Game::UpdatePauseMenu() {
     pauseSelection++;
   }
 
-  if (pauseSelection < 0) pauseSelection = 1;
-  if (pauseSelection > 1) pauseSelection = 0;
+  if (pauseSelection < 0) pauseSelection = 2;
+  if (pauseSelection > 2) pauseSelection = 0;
 
-  if (IsKeyPressed(KEY_ENTER)) {
+  bool confirm =
+    IsKeyPressed(KEY_ENTER) ||
+    IsKeyPressed(KEY_SPACE) ||
+    IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+  if (confirm) {
     if (pauseSelection == 0) {
       currentState = GameState::Playing;
     } else if (pauseSelection == 1) {
       currentState = GameState::Title;
+    } else if (pauseSelection == 2) {
+      shouldQuit = true;
     }
   }
 
@@ -206,18 +233,43 @@ void DrawCenteredTextInRect(const char* text, Rectangle rect, int y, int fontSiz
   DrawText(text, x, y, fontSize, color);
 }
 
+Rectangle Game::MakeCenteredButtonRect(float y, float width, float height) {
+  return Rectangle{
+    (screenWidth - width) / 2.0f,
+    y,
+    width,
+    height
+  };
+}
+
 void Game::DrawPauseMenu() {
   DrawPlaying();
 
-  Rectangle panel = {150, 100, 500, 250};
-  DrawRectangleRec(panel, Fade(BLACK, 0.85f));
+  DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.35f));
 
-  Color resumeColor = (pauseSelection == 0) ? YELLOW : RAYWHITE;
-  Color titleColor = (pauseSelection == 1) ? YELLOW : RAYWHITE;
+  Rectangle panel = {
+    100.0f, // x
+    70.0f, // y
+    600.0f, // w
+    320.0f // h
+  };
 
-  DrawCenteredTextInRect("Paused", panel, panel.y + 30, 40, RAYWHITE);
-  DrawCenteredTextInRect("Resume", panel, panel.y + 110, 30, resumeColor);
-  DrawCenteredTextInRect("Return to Title", panel, panel.y + 160, 30, titleColor);
+  DrawRectangleRec(panel, Fade(BLACK, 0.7f));
+  DrawRectangleLinesEx(panel, 2.0f, GRAY);
+
+  DrawCenteredTextInRect("Paused", panel, panel.y + 25, 40, RAYWHITE);
+
+  float buttonWidth = 300.0f;
+  float buttonHeight = 60.0f;
+  float buttonX = panel.x + (panel.width - buttonWidth) / 2.0f;
+
+  Rectangle resumeButton = {buttonX, panel.y + 90.0f, buttonWidth, buttonHeight};
+  Rectangle titleButton = {buttonX, panel.y + 160.0f, buttonWidth, buttonHeight};
+  Rectangle exitButton = {buttonX, panel.y + 230.0f, buttonWidth, buttonHeight};
+
+  MakeButton("Resume", resumeButton, pauseSelection == 0);
+  MakeButton("Return to Title", titleButton, pauseSelection == 1);
+  MakeButton("Save and Exit", exitButton, pauseSelection == 2);
 }
 
 Vector2 Game::GetVirtualMouse() const {

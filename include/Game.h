@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "raylib.h"
+#include "Player.h"
 #include <string>
 
 enum class GameState {
@@ -35,11 +36,12 @@ private:
 
   int pauseSelection;
 
-  
+  Player player;
 
   Vector2 GetVirtualMouse() const;
 
   bool MakeButton(const std::string& text, Rectangle rect, bool selected);
+  Rectangle MakeCenteredButtonRect(float y, float width, float height);
 
   void UpdateLogo();
   void UpdateTitle();
