@@ -3,6 +3,7 @@
 
 int main() {
   InitWindow(800, 450, "Crawler");
+  SetExitKey(KEY_NULL);
   SetTargetFPS(60);
 
   Game game;

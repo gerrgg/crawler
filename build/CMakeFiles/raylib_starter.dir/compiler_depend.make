@@ -4,7 +4,6 @@
 CMakeFiles/raylib_starter.dir/src/Game.cpp.o: ../src/Game.cpp \
   /usr/include/stdc-predef.h \
   ../include/Game.h \
-  ../include/Player.h \
   _deps/raylib-src/src/raylib.h \
   /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h
 
@@ -18,8 +17,7 @@ CMakeFiles/raylib_starter.dir/src/main.cpp.o: ../src/main.cpp \
   /usr/include/stdc-predef.h \
   _deps/raylib-src/src/raylib.h \
   /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
-  ../include/Game.h \
-  ../include/Player.h
+  ../include/Game.h
 
 
 ../src/main.cpp:
