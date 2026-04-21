@@ -31,13 +31,15 @@ private:
   Texture2D logo;
   Texture2D title;
 
+  Player player;
+  Camera2D camera;
+
   float logoAlpha;
   float logoTimer;
-
+  
   int pauseSelection;
-
-  Player player;
-
+  
+  Vector2 GetVirtualMouseWorld() const;
   Vector2 GetVirtualMouse() const;
 
   bool MakeButton(const std::string& text, Rectangle rect, bool selected);

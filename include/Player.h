@@ -10,6 +10,7 @@ public:
   void Update();
   void Draw();
   void SetTarget(Vector2 newTarget);
+  Vector2 GetPosition() const;
 
 private:
   Vector2 position;

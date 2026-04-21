@@ -12,6 +12,11 @@ Game::Game(int virtualWidth, int virtualHeight)
   logo = LoadTexture("assets/logo.png");
   title = LoadTexture("assets/title_screen.png");
   shouldQuit = false;
+
+  camera.target = player.GetPosition();
+  camera.offset = {(float)screenWidth / 2.0f, (float)screenHeight / 2.0f};
+  camera.rotation = 0.0f;
+  camera.zoom = 1.0f;
 }
 
 bool Game::ShouldQuit() const {
@@ -56,6 +61,11 @@ void Game::Draw() {
       DrawPauseMenu();
       break;
   }
+}
+
+Vector2 Game::GetVirtualMouseWorld() const {
+  Vector2 mouse = GetVirtualMouse();
+  return GetScreenToWorld2D(mouse, camera);
 }
 
 void Game::UpdateLogo() {
@@ -165,20 +175,53 @@ void Game::UpdatePlaying() {
   }
 
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-    player.SetTarget(GetVirtualMouse());
+    player.SetTarget(GetVirtualMouseWorld());
   }
 
   player.Update();
+
+  Vector2 playerPos = player.GetPosition();
+  float dt = GetFrameTime();
+  float followSpeed = 5.0f;
+
+  camera.target.x += (playerPos.x - camera.target.x) * followSpeed * dt;
+  camera.target.y += (playerPos.y - camera.target.y) * followSpeed * dt;
 }
 
 void Game::DrawPlaying() {
-  ClearBackground(DARKGREEN);
+  ClearBackground(BLACK);
 
-  player.Draw();
+  BeginMode2D(camera);
 
-  DrawText("Gameplay running...", 20, 20, 30, WHITE);
-  DrawText("Click to move", 20, 60, 20, WHITE);
-  DrawText("Press ESC for menu", 20, 90, 20, WHITE);
+    // world background
+    DrawRectangle(-2000, -2000, 4000, 4000, DARKGREEN);
+
+    // simple grid / tiles
+    const int tileSize = 64;
+
+    for (int x = -2000; x <= 2000; x += tileSize) {
+      for (int y = -2000; y <= 2000; y += tileSize) {
+        Color tileColor = ((x / tileSize + y / tileSize) % 2 == 0)
+          ? Color{60, 90, 60, 255}
+          : Color{70, 100, 70, 255};
+
+        DrawRectangle(x, y, tileSize, tileSize, tileColor);
+        DrawRectangleLines(x, y, tileSize, tileSize, Fade(BLACK, 0.2f));
+      }
+    }
+
+    // origin marker
+    DrawCircle(0, 0, 10, RED);
+    DrawLine(-40, 0, 40, 0, RED);
+    DrawLine(0, -40, 0, 40, RED);
+
+    // player
+    player.Draw();
+
+  EndMode2D();
+
+  DrawText("Click to move", 20, 20, 20, WHITE);
+  DrawText("Press ESC for menu", 20, 50, 20, WHITE);
 }
 
 void Game::UpdatePauseMenu() {

@@ -9,6 +9,10 @@ Player::Player(float startX, float startY)
     movingToTarget(false) {
 }
 
+Vector2 Player::GetPosition() const {
+  return position;
+}
+
 void Player::SetTarget(Vector2 newTarget) {
   moveTarget = newTarget;
   movingToTarget = true;
