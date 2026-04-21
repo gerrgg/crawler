@@ -12,21 +12,26 @@ enum class GameState {
 
 class Game {
 public:
-  Game();
+  Game(int virtualWidth, int virtualHeight);
 
   void Update();
   void Draw();
 
 private:
+  int screenWidth;
+  int screenHeight;
+
   GameState currentState;
 
   Texture2D logo;
   Texture2D title;
-  
+
   float logoAlpha;
   float logoTimer;
 
   int pauseSelection;
+
+  Vector2 GetVirtualMouse() const;
 
   void UpdateLogo();
   void UpdateTitle();

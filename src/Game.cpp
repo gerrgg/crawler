@@ -1,12 +1,15 @@
 #include "Game.h"
+#include <algorithm>
 
-Game::Game()
-  : currentState(GameState::Logo),
+Game::Game(int virtualWidth, int virtualHeight)
+  : screenWidth(virtualWidth),
+    screenHeight(virtualHeight),
+    currentState(GameState::Logo),
     logoAlpha(0.0f),
     logoTimer(0.0f),
     pauseSelection(0) {
-  logo = LoadTexture("assets/logo.png");
-  title = LoadTexture("assets/title_screen.png");
+  logo = LoadTexture("assets/logo_2.png");
+  title = LoadTexture("assets/title_screen_2.png");
 }
 
 void Game::Update() {
@@ -52,7 +55,7 @@ void Game::Draw() {
 void Game::UpdateLogo() {
   float dt = GetFrameTime();
 
-  logoTimer += dt;
+  logoTimer += dt * 0.5f;
 
   if (logoAlpha < 1.0f) {
     logoAlpha += dt;
@@ -67,13 +70,16 @@ void Game::UpdateLogo() {
 void Game::DrawLogo() {
   ClearBackground(RAYWHITE);
 
-  float scale = 0.75f;
+  // scale logo to 50% and center it on the screen
+  float scale = 0.5f;
   float logoWidth = logo.width * scale;
   float logoHeight = logo.height * scale;
 
-  float x = (GetScreenWidth() - logoWidth) / 2.0f;
-  float y = (GetScreenHeight() - logoHeight) / 2.0f;
+  // calculate position to center the logo
+  float x = (screenWidth - logoWidth) / 2.0f;
+  float y = (screenHeight - logoHeight) / 2.0f;
 
+  // draw the logo with fade effect
   DrawTextureEx(logo, {x, y}, 0.0f, scale, Fade(WHITE, logoAlpha));
 }
 
@@ -84,13 +90,13 @@ void Game::UpdateTitle() {
   }
 
   Rectangle playButton = {
-    GetScreenWidth() / 2.0f - 100.0f,
+    screenWidth / 2.0f - 100.0f,
     260.0f,
     200.0f,
     50.0f
   };
 
-  Vector2 mouse = GetMousePosition();
+  Vector2 mouse = GetVirtualMouse();
 
   if (CheckCollisionPointRec(mouse, playButton) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
     ResetGame();
@@ -101,29 +107,24 @@ void Game::UpdateTitle() {
 void Game::DrawTitle() {
   ClearBackground(BLACK);
 
-  float scale = 0.75f;
-  float titleWidth = title.width * scale;
-  float titleHeight = title.height * scale;
-
-  float x = (GetScreenWidth() - titleWidth) / 2.0f;
-  float y = 100.0f;
-
-  DrawTextureEx(title, {x, y}, 0.0f, scale, RAYWHITE);
-
-  const char* titleText = "CRAWLER";
-  int fontSize = 64;
-  int textWidth = MeasureText(titleText, fontSize);
-
-  DrawText(titleText, (GetScreenWidth() - textWidth) / 2, 100, fontSize, RAYWHITE);
+  DrawTexturePro(
+    title,
+    (Rectangle){0, 0, (float)title.width, (float)title.height},
+    (Rectangle){0, 0, (float)screenWidth, (float)screenHeight},
+    (Vector2){0, 0},
+    0.0f,
+    WHITE
+  );
 
   Rectangle playButton = {
-    GetScreenWidth() / 2.0f - 100.0f,
+    screenWidth / 2.0f - 100.0f,
     260.0f,
     200.0f,
     50.0f
   };
 
-  DrawRectangleRec(playButton, DARKGRAY);
+  DrawRectangleRec(playButton, Fade(BLACK, 0.65f));
+  DrawRectangleLinesEx(playButton, 2.0f, GRAY);
   DrawText("PLAY", playButton.x + 60, playButton.y + 12, 28, RAYWHITE);
 }
 
@@ -171,17 +172,44 @@ void Game::UpdatePauseMenu() {
   }
 }
 
+void DrawCenteredTextInRect(const char* text, Rectangle rect, int y, int fontSize, Color color) {
+  int textWidth = MeasureText(text, fontSize);
+  int x = rect.x + (rect.width - textWidth) / 2;
+  DrawText(text, x, y, fontSize, color);
+}
+
 void Game::DrawPauseMenu() {
   DrawPlaying();
 
-  DrawRectangle(150, 100, 500, 250, Fade(BLACK, 0.85f));
-  DrawText("Paused", 320, 130, 40, RAYWHITE);
+  Rectangle panel = {150, 100, 500, 250};
+  DrawRectangleRec(panel, Fade(BLACK, 0.85f));
 
   Color resumeColor = (pauseSelection == 0) ? YELLOW : RAYWHITE;
   Color titleColor = (pauseSelection == 1) ? YELLOW : RAYWHITE;
 
-  DrawText("Resume", 320, 210, 30, resumeColor);
-  DrawText("Return to Title", 250, 260, 30, titleColor);
+  DrawCenteredTextInRect("Paused", panel, panel.y + 30, 40, RAYWHITE);
+  DrawCenteredTextInRect("Resume", panel, panel.y + 110, 30, resumeColor);
+  DrawCenteredTextInRect("Return to Title", panel, panel.y + 160, 30, titleColor);
+}
+
+Vector2 Game::GetVirtualMouse() const {
+  float scale = std::min(
+    (float)GetScreenWidth() / screenWidth,
+    (float)GetScreenHeight() / screenHeight
+  );
+
+  float renderWidth = screenWidth * scale;
+  float renderHeight = screenHeight * scale;
+
+  float offsetX = (GetScreenWidth() - renderWidth) / 2.0f;
+  float offsetY = (GetScreenHeight() - renderHeight) / 2.0f;
+
+  Vector2 mouse = GetMousePosition();
+
+  mouse.x = (mouse.x - offsetX) / scale;
+  mouse.y = (mouse.y - offsetY) / scale;
+
+  return mouse;
 }
 
 void Game::ResetGame() {
