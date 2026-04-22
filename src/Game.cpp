@@ -20,10 +20,33 @@ Game::Game(int virtualWidth, int virtualHeight)
  
 }
 
+/*==================================
+    Menu Helpers (should seperate)
+===================================*/
+
+// center text within rectangle
+void DrawCenteredTextInRect(const char* text, Rectangle rect, int y, int fontSize, Color color) {
+  int textWidth = MeasureText(text, fontSize);
+  int x = rect.x + (rect.width - textWidth) / 2;
+  DrawText(text, x, y, fontSize, color);
+}
+
+// menu helper
+Rectangle Game::MakeCenteredButtonRect(float y, float width, float height) {
+  return Rectangle{
+    (screenWidth - width) / 2.0f,
+    y,
+    width,
+    height
+  };
+}
+
+// should we break out of loop and quit?
 bool Game::ShouldQuit() const {
   return shouldQuit;
 }
 
+// update based on gamestate
 void Game::Update() {
   switch (currentState) {
     case GameState::Logo:
@@ -44,6 +67,7 @@ void Game::Update() {
   }
 }
 
+// Draw based on gamestate
 void Game::Draw() {
   switch (currentState) {
     case GameState::Logo:
@@ -64,27 +88,39 @@ void Game::Draw() {
   }
 }
 
+// Get the world space position for a 2d camera screen space position
+// Determine where we clicked on the world
 Vector2 Game::GetVirtualMouseWorld() const {
   Vector2 mouse = GetVirtualMouse();
   return GetScreenToWorld2D(mouse, camera);
 }
 
+// animate the logo fade in by incrementing alpha until full
 void Game::UpdateLogo() {
   float dt = GetFrameTime();
 
-  logoTimer += dt * 0.5f;
+  // controls how long the logo stays up
+  logoTimer += dt;
 
+  // keep fading in
   if (logoAlpha < 1.0f) {
+
+    // controls speed of fade in
     logoAlpha += dt;
+
+    // stop once full
     if (logoAlpha > 1.0f) logoAlpha = 1.0f;
   }
 
+  // move to title after 2.0f
   if (logoTimer >= 2.0f) {
     currentState = GameState::Title;
   }
 }
 
+// draw the logo screen
 void Game::DrawLogo() {
+  //clear
   ClearBackground(RAYWHITE);
 
   // scale logo to 50% and center it on the screen
@@ -96,13 +132,16 @@ void Game::DrawLogo() {
   float x = (screenWidth - logoWidth) / 2.0f;
   float y = (screenHeight - logoHeight) / 2.0f;
 
-  // draw the logo with fade effect
+  // draw the logo asset and fade in
   DrawTextureEx(logo, {x, y}, 0.0f, scale, Fade(WHITE, logoAlpha));
 }
 
+// Draw title screen
 void Game::DrawTitle() {
+  //clear
   ClearBackground(BLACK);
 
+  // draw asset as background, fill screen
   DrawTexturePro(
     title,
     (Rectangle){0, 0, (float)title.width, (float)title.height},
@@ -112,9 +151,11 @@ void Game::DrawTitle() {
     WHITE
   );
 
+  // draw play button
   Rectangle playButton = {screenWidth / 2.0f - 100.0f, 260.0f, 200.0f, 50.0f};
   MakeButton("PLAY", playButton, false);
 
+  // draw exit button
   Rectangle exitButton = {screenWidth / 2.0f - 100.0f, 320.0f, 200.0f, 50.0f};
   MakeButton("EXIT", exitButton, false);
 }
@@ -178,11 +219,15 @@ void Game::UpdatePlaying() {
     return;
   }
 
+  // on click
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    // get where we clicked
     Vector2 target = GetVirtualMouseWorld();
     Vector2 tileCenter;
 
+    // check if we can go there 
     if (tileMap.TryGetPassableTileCenter(target, tileCenter)) {
+      // move the player to where we clicked
       player.SetTarget(tileCenter);
     }
   }
@@ -197,48 +242,45 @@ void Game::UpdatePlaying() {
   camera.target.y += (playerPos.y - camera.target.y) * followSpeed * dt;
 }
 
+// init Game::Playing
 void Game::DrawPlaying() {
+  // clear
   ClearBackground(BLACK);
+
+  // set camera (things between begin and end are affected by the camera)
   BeginMode2D(camera);
+    // draw map
     tileMap.Draw();
-    DrawCircle(0, 0, 10, RED);
-    DrawLine(-40, 0, 40, 0, RED);
-    DrawLine(0, -40, 0, 40, RED);
+    // draw player init position
     player.Draw();
+  // restore normal screen
   EndMode2D();
 }
 
+// Handle pause menu hover/actions
 void Game::UpdatePauseMenu() {
   Rectangle resumeButton = {screenWidth / 2.0f - 100.0f, 190.0f, 200.0f, 50.0f};
   Rectangle titleButton = {screenWidth / 2.0f - 100.0f, 250.0f, 200.0f, 50.0f};
   Rectangle exitButton = {screenWidth / 2.0f - 100.0f, 310.0f, 200.0f, 50.0f};
 
+  // get mouse position
   Vector2 mouse = GetVirtualMouse();
 
+  // track hovers
   bool resumeHovered = CheckCollisionPointRec(mouse, resumeButton);
   bool titleHovered = CheckCollisionPointRec(mouse, titleButton);
   bool exitHovered = CheckCollisionPointRec(mouse, exitButton);
 
+  // track which button is being hovered
   if (resumeHovered) pauseSelection = 0;
   if (titleHovered) pauseSelection = 1;
   if (exitHovered) pauseSelection = 2;
 
-  if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
-    pauseSelection--;
-  }
-
-  if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
-    pauseSelection++;
-  }
-
-  if (pauseSelection < 0) pauseSelection = 2;
-  if (pauseSelection > 2) pauseSelection = 0;
-
+  // track what was clicked
   bool confirm =
-    IsKeyPressed(KEY_ENTER) ||
-    IsKeyPressed(KEY_SPACE) ||
     IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 
+  // take action based on what was clicked
   if (confirm) {
     if (pauseSelection == 0) {
       currentState = GameState::Playing;
@@ -249,31 +291,23 @@ void Game::UpdatePauseMenu() {
     }
   }
 
+  // resume game
   if (IsKeyPressed(KEY_ESCAPE)) {
     currentState = GameState::Playing;
   }
 }
 
-void DrawCenteredTextInRect(const char* text, Rectangle rect, int y, int fontSize, Color color) {
-  int textWidth = MeasureText(text, fontSize);
-  int x = rect.x + (rect.width - textWidth) / 2;
-  DrawText(text, x, y, fontSize, color);
-}
 
-Rectangle Game::MakeCenteredButtonRect(float y, float width, float height) {
-  return Rectangle{
-    (screenWidth - width) / 2.0f,
-    y,
-    width,
-    height
-  };
-}
 
+// Show Pause Menu
+// https://www.raylib.com/cheatsheet/cheatsheet.html
 void Game::DrawPauseMenu() {
   DrawPlaying();
 
+  // overlay over game
   DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.35f));
 
+  // panel
   Rectangle panel = {
     100.0f, // x
     70.0f, // y
@@ -281,24 +315,30 @@ void Game::DrawPauseMenu() {
     320.0f // h
   };
 
+  // Create pause menu box
   DrawRectangleRec(panel, Fade(BLACK, 0.7f));
   DrawRectangleLinesEx(panel, 2.0f, GRAY);
 
+  // add text
   DrawCenteredTextInRect("Paused", panel, panel.y + 25, 40, RAYWHITE);
 
+  // button defaults
   float buttonWidth = 300.0f;
   float buttonHeight = 60.0f;
   float buttonX = panel.x + (panel.width - buttonWidth) / 2.0f;
 
+  // space out buttons
   Rectangle resumeButton = {buttonX, panel.y + 90.0f, buttonWidth, buttonHeight};
   Rectangle titleButton = {buttonX, panel.y + 160.0f, buttonWidth, buttonHeight};
   Rectangle exitButton = {buttonX, panel.y + 230.0f, buttonWidth, buttonHeight};
 
+  // MakeButton(text, dims, callback)
   MakeButton("Resume", resumeButton, pauseSelection == 0);
   MakeButton("Return to Title", titleButton, pauseSelection == 1);
   MakeButton("Save and Exit", exitButton, pauseSelection == 2);
 }
 
+// Tracks mouse position on virtual texture and scales up to match window size
 Vector2 Game::GetVirtualMouse() const {
   float scale = std::min(
     (float)GetScreenWidth() / screenWidth,
@@ -319,9 +359,11 @@ Vector2 Game::GetVirtualMouse() const {
   return mouse;
 }
 
+// TODO
 void Game::ResetGame() {
   // reset player position
   // reset score
   // clear enemies
   // reset timers
 }
+

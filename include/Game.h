@@ -7,10 +7,10 @@
 #include <string>
 
 enum class GameState {
-  Logo,
-  Title,
-  Playing,
-  PauseMenu
+  Logo, 
+  Title, 
+  Playing, 
+  PauseMenu 
 };
 
 class Game {
@@ -23,46 +23,58 @@ public:
   bool ShouldQuit() const; // for when user wants to close
 
 private:
+  // map object
   TileMap tileMap;
 
+  // window size
   int screenWidth;
   int screenHeight;
 
+  // end game?
   bool shouldQuit;
 
-  GameState currentState;
-
-  Texture2D logo;
-  Texture2D title;
-
-  Player player;
-  Camera2D camera;
-
+  // logo fade in
   float logoAlpha;
   float logoTimer;
   
+  // what did the user pick in the pause menu
   int pauseSelection;
 
-  Texture2D tileset;
+  // controls which state to run
+  GameState currentState;
 
+  // textures for logo/title screens
+  Texture2D logo;
+  Texture2D title;
 
-  void DrawTileMap();
-  void DrawTilesetDebug();
-  
+  // player and camera objects
+  Player player;
+  Camera2D camera;
+
+  // tracking mouse in game (playing)
   Vector2 GetVirtualMouseWorld() const;
+
+  // tracking mouse in UI (logo/title/pause)
   Vector2 GetVirtualMouse() const;
 
+  // UI helpers
   bool MakeButton(const std::string& text, Rectangle rect, bool selected);
   Rectangle MakeCenteredButtonRect(float y, float width, float height);
 
-  void UpdateLogo();
-  void UpdateTitle();
-  void UpdatePlaying();
-  void UpdatePauseMenu();
-
+  // logo
   void DrawLogo();
+  void UpdateLogo();
+
+  // title
   void DrawTitle();
+  void UpdateTitle();
+
+  // game
   void DrawPlaying();
+  void UpdatePlaying();
+
+  // pause
+  void UpdatePauseMenu();
   void DrawPauseMenu();
 
   void ResetGame();

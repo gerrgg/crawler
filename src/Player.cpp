@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <cmath>
 
+// set player initial position
 Player::Player(float startX, float startY)
   : position{startX, startY},
     moveTarget{startX, startY},
@@ -9,15 +10,18 @@ Player::Player(float startX, float startY)
     movingToTarget(false) {
 }
 
+// return player position ([x, y])
 Vector2 Player::GetPosition() const {
   return position;
 }
 
+// set new player position (controlled by click)
 void Player::SetTarget(Vector2 newTarget) {
   moveTarget = newTarget;
   movingToTarget = true;
 }
 
+// animate moving position
 void Player::Update() {
   if (!movingToTarget) {
     return;

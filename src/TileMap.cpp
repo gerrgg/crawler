@@ -1,31 +1,32 @@
 #include "TileMap.h"
 
+// setup and draw
 TileMap::TileMap() {
   Load();
   LoadDefaultMap();
 }
 
+// get the texture asset
 void TileMap::Load() {
   tileset = LoadTexture("assets/8_cave.png");
 }
 
+// procedurally generate ground and decor map
 void TileMap::LoadDefaultMap() {
+  GenerateGround();
+  GenerateDecor(2, 5);
+}
 
-  // fill ground map with simple procedural generation
+// procedurally generate ground
+void TileMap::GenerateGround() {
   for (int y = 0; y < mapHeight; y++) {
     for (int x = 0; x < mapWidth; x++) {
       groundMap[y][x] = GetDefaultTile(x, y);
     }
   }
-
-  GenerateDecor(2, 5);
 }
 
-void TileMap::Draw() const {
-  DrawLayer(groundMap);
-  DrawLayer(decorMap);
-}
-
+// generate corners, walls and fill the rest with ground
 int TileMap::GetDefaultTile(int x, int y) const {
   if (x == 0 && y == 0) return TILE_WALL_TOP_LEFT;
   if (x == mapWidth - 1 && y == 0) return TILE_WALL_TOP_RIGHT;
@@ -40,6 +41,17 @@ int TileMap::GetDefaultTile(int x, int y) const {
   return TILE_FLOOR_DIRT;
 }
 
+// multiple maps allows us to place objects on the ground like rocks and mushrooms
+void TileMap::Draw() const {
+  DrawLayer(groundMap);
+  DrawLayer(decorMap);
+}
+
+/*
+* Procedurally generate decorations
+* tileX, tileY keep decorations away from walls
+* radius is how many spaces away a decoration should be from others
+*/
 bool TileMap::HasNearbyDecoration(int tileX, int tileY, int radius) const {
   for (int y = tileY - radius; y <= tileY + radius; y++) {
     for (int x = tileX - radius; x <= tileX + radius; x++) {
@@ -56,6 +68,7 @@ bool TileMap::HasNearbyDecoration(int tileX, int tileY, int radius) const {
   return false;
 }
 
+// randomly pick a piece of decor
 int TileMap::GetRandomDecorTile() const {
   int roll = GetRandomValue(0, 5);
 
@@ -70,6 +83,7 @@ int TileMap::GetRandomDecorTile() const {
   }
 }
 
+// clears the decor map and places decor tiles where passable
 void TileMap::GenerateDecor(int offset, int radius) {
   for (int y = 0; y < mapHeight; y++) {
     for (int x = 0; x < mapWidth; x++) {
@@ -99,6 +113,7 @@ void TileMap::GenerateDecor(int offset, int radius) {
   }
 }
 
+// loops the length of the map and places tiles set in array
 void TileMap::DrawLayer(const Map& layer) const {
   int tilesPerRow = tileset.width / tileSize;
 
@@ -129,6 +144,7 @@ void TileMap::DrawLayer(const Map& layer) const {
   }
 }
 
+// for gridding off tileset asset
 void TileMap::DrawDebug() const {
   DrawTexture(tileset, 0, 0, WHITE);
 
@@ -147,6 +163,7 @@ void TileMap::DrawDebug() const {
   }
 }
 
+// mark tiles as passable or not
 bool TileMap::IsTilePassable(int tile) const {
   switch (tile) {
     case TILE_FLOOR_DIRT:
@@ -164,6 +181,7 @@ bool TileMap::IsTilePassable(int tile) const {
   }
 }
 
+// determines if the clicked tile can be walked on
 bool TileMap::IsWorldPositionPassable(Vector2 worldPos) const {
   int tileX = (int)(worldPos.x / tileSize);
   int tileY = (int)(worldPos.y / tileSize);
@@ -176,10 +194,12 @@ bool TileMap::IsWorldPositionPassable(Vector2 worldPos) const {
   return IsTilePassable(tile);
 }
 
+// checks if the clicked area is within bounds of the map
 bool TileMap::IsTileCoordinateInBounds(int x, int y) const {
   return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight;
 }
 
+// returns the center of the tile
 Vector2 TileMap::GetTileCenter(int x, int y) const {
   return {
     x * tileSize + tileSize / 2.0f,
@@ -187,10 +207,12 @@ Vector2 TileMap::GetTileCenter(int x, int y) const {
   };
 }
 
+// converts world size to tile X coordinate
 int TileMap::WorldToTileX(float worldX) const {
   return (int)(worldX / tileSize);
 }
 
+// converts world to tile Y coordinate
 int TileMap::WorldToTileY(float worldY) const {
   return (int)(worldY / tileSize);
 }
@@ -199,6 +221,7 @@ int TileMap::GetTileSize() const {
   return tileSize;
 }
 
+// returns the ENUM value of a tile given a coordinate
 int TileMap::GetTileAt(int x, int y) const {
   if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) {
     return -1;
@@ -207,6 +230,7 @@ int TileMap::GetTileAt(int x, int y) const {
   return groundMap[y][x];
 }
 
+// determines if clicked tile can be walked on
 bool TileMap::TryGetPassableTileCenter(Vector2 worldPos, Vector2& outCenter) const {
   int tileX = WorldToTileX(worldPos.x);
   int tileY = WorldToTileY(worldPos.y);
