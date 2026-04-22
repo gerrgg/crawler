@@ -7,7 +7,7 @@
 class TileMap {
 public:
   static constexpr int tileSize = 32;
-  static constexpr int mapWidth = 32;
+  static constexpr int mapWidth = 32 * 10;
   static constexpr int mapHeight = 16;
 
   using Map = std::array<std::array<int, mapWidth>, mapHeight>;
@@ -68,6 +68,11 @@ public:
   int GetDefaultTile(int x, int y) const;
 
   bool TryGetPassableTileCenter(Vector2 worldPos, Vector2& outCenter) const;
+  
+  bool HasNearbyDecoration(int tileX, int tileY, int radius) const;
+  int GetRandomDecorTile() const;
+
+  void GenerateDecor(int offset = 1, int radius = 1);
 
 private:
   Texture2D tileset;

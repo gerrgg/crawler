@@ -11,13 +11,6 @@ void TileMap::Load() {
 
 void TileMap::LoadDefaultMap() {
 
-  // fill decor array with empty
-  for (int y = 0; y < mapHeight; y++) {
-    for (int x = 0; x < mapWidth; x++) {
-      decorMap[y][x] = TILE_EMPTY;
-    }
-  }
-
   // fill ground map with simple procedural generation
   for (int y = 0; y < mapHeight; y++) {
     for (int x = 0; x < mapWidth; x++) {
@@ -25,15 +18,7 @@ void TileMap::LoadDefaultMap() {
     }
   }
 
-  // manually place decor
-  decorMap[3][5] = TILE_PLANT_2;
-  decorMap[4][18] = TILE_ROCK_2;
-  decorMap[7][12] = TILE_PLANT;
-  decorMap[8][29] = TILE_CRYSTAL_PINK;
-  decorMap[10][18] = TILE_PLANT;
-  decorMap[11][9] = TILE_ROCK;
-  decorMap[14][4] = TILE_CRYSTAL_BLUE;
-  decorMap[15][20] = TILE_ROCK_3;
+  GenerateDecor(2, 5);
 }
 
 void TileMap::Draw() const {
@@ -53,6 +38,65 @@ int TileMap::GetDefaultTile(int x, int y) const {
   if (x == mapWidth - 1) return TILE_WALL_RIGHT;
 
   return TILE_FLOOR_DIRT;
+}
+
+bool TileMap::HasNearbyDecoration(int tileX, int tileY, int radius) const {
+  for (int y = tileY - radius; y <= tileY + radius; y++) {
+    for (int x = tileX - radius; x <= tileX + radius; x++) {
+      if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) {
+        continue;
+      }
+
+      if (decorMap[y][x] != TILE_EMPTY) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+int TileMap::GetRandomDecorTile() const {
+  int roll = GetRandomValue(0, 5);
+
+  switch (roll) {
+    case 0: return TILE_PLANT;
+    case 1: return TILE_PLANT_2;
+    case 2: return TILE_ROCK;
+    case 3: return TILE_ROCK_2;
+    case 4: return TILE_MUSHROOM_RED;
+    case 5: return TILE_CRYSTAL_BLUE;
+    default: return TILE_PLANT;
+  }
+}
+
+void TileMap::GenerateDecor(int offset, int radius) {
+  for (int y = 0; y < mapHeight; y++) {
+    for (int x = 0; x < mapWidth; x++) {
+      decorMap[y][x] = TILE_EMPTY;
+    }
+  }
+
+  for (int y = offset; y < mapHeight - offset; y++) {
+    for (int x = offset; x < mapWidth - offset; x++) {
+      // only place decor on passable ground
+      if (!IsTilePassable(groundMap[y][x])) {
+        continue;
+      }
+
+      // random chance
+      if (GetRandomValue(0, 100) > 12) {
+        continue;
+      }
+
+      // avoid placing too close to another decoration
+      if (HasNearbyDecoration(x, y, radius)) {
+        continue;
+      }
+
+      decorMap[y][x] = GetRandomDecorTile();
+    }
+  }
 }
 
 void TileMap::DrawLayer(const Map& layer) const {
