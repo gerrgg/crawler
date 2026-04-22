@@ -22,6 +22,7 @@ add_executable(raylib_starter
   src/main.cpp
   src/Game.cpp
   src/Player.cpp
+  src/TileMap.cpp
 )
 
 target_link_libraries(raylib_starter PRIVATE raylib)
