@@ -1,3 +1,9 @@
+/**
+ * Name: Gregory Bastianelli
+ * Project: Crawler
+ * Usage: ./run.sh
+ */
+
 #include "raylib.h"
 #include "Game.h"
 #include <cmath>
