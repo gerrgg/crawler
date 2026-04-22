@@ -7,7 +7,20 @@ Player::Player(float startX, float startY)
     moveTarget{startX, startY},
     speed(220.0f),
     radius(20.0f),
-    movingToTarget(false) {
+    movingToTarget(false),
+    spriteScale(1.0f),
+    currentFrame(2),
+    currentRow(0),
+    animationTimer(0.0f),
+    animationSpeed(0.12f),
+    walkFrameDir(1){
+  sprite = LoadTexture("assets/player.png");
+}
+
+Player::~Player(){
+  if(sprite.id != 0){
+    UnloadTexture(sprite);
+  }
 }
 
 // return player position ([x, y])
@@ -21,9 +34,64 @@ void Player::SetTarget(Vector2 newTarget) {
   movingToTarget = true;
 }
 
+
+
+void Player::DrawDebug() const {
+  DrawTexture(sprite, 0, 0, WHITE);
+
+  int tilesPerRow = sprite.width / frameWidth;
+  int tilesPerCol = sprite.height / frameHeight;
+
+  for (int y = 0; y < tilesPerCol; y++) {
+    for (int x = 0; x < tilesPerRow; x++) {
+      int drawX = x * frameWidth;
+      int drawY = y * frameHeight;
+      int index = y * tilesPerRow + x;
+
+      DrawRectangleLines(drawX, drawY, frameWidth, frameHeight, RED);
+      DrawText(TextFormat("%d", index), drawX + 4, drawY + 4, 10, YELLOW);
+    }
+  }
+}
+
+void Player::Draw() {
+  if(sprite.id == 0){
+    DrawCircleV(position, radius, MAROON);
+    return;
+  }
+
+  float drawWidth = frameWidth * spriteScale;
+  float drawHeight = frameHeight * spriteScale;
+
+  // clip the asset
+  Rectangle source = {
+    (float)(currentFrame * frameWidth),
+    (float)(currentRow * frameHeight),
+    (float)frameWidth,
+    (float)frameHeight
+  };
+
+  Rectangle dest = {
+    position.x - drawWidth / 2.0f,
+    position.y - drawHeight / 2.0f,
+    drawWidth,
+    drawHeight
+  };
+
+  DrawTexturePro(
+    sprite,
+    source,
+    dest,
+    {0.0f, 0.0f},
+    0.0f,
+    WHITE
+  );
+}
+
 // animate moving position
 void Player::Update() {
   if (!movingToTarget) {
+    currentFrame = 1; // idle
     return;
   }
 
@@ -47,10 +115,38 @@ void Player::Update() {
     toTarget.y / distance
   };
 
+  if (std::abs(direction.x) > std::abs(direction.y)) {
+    if (direction.x > 0) {
+      currentRow = 3; // right
+    } else {
+      currentRow = 2; // left
+    }
+  } else {
+    if (direction.y > 0) {
+      currentRow = 0; // down
+    } else {
+      currentRow = 1; // up
+    }
+  }
+
   position.x += direction.x * speed * dt;
   position.y += direction.y * speed * dt;
-}
 
-void Player::Draw() {
-  DrawCircleV(position, radius, MAROON);
+  // animate walk frames
+  animationTimer += dt;
+  if (animationTimer >= animationSpeed) {
+    animationTimer = 0.0f;
+
+    currentFrame += walkFrameDir;
+
+    // bounce between 1 and 3
+    if (currentFrame >= 3) {
+      currentFrame = 2;
+      walkFrameDir = -1;
+    }
+    else if (currentFrame <= 1) {
+      currentFrame = 0;
+      walkFrameDir = 1;
+    }
+  }
 }
