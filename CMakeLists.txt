@@ -22,6 +22,7 @@ add_executable(raylib_starter
   src/main.cpp
   src/Game.cpp
   src/Player.cpp
+  src/Enemy.cpp
   src/TileMap.cpp
 )
 

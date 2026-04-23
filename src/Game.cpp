@@ -8,6 +8,7 @@ Game::Game(int virtualWidth, int virtualHeight)
     logoAlpha(0.0f),
     logoTimer(0.0f),
     pauseSelection(0),
+    enemy(virtualWidth / 2.0f + 64.0f, virtualHeight / 2.0f),
     player(virtualWidth / 2.0f, virtualHeight / 2.0f) {
   logo = LoadTexture("assets/logo.png");
   title = LoadTexture("assets/title_screen.png");
@@ -229,12 +230,17 @@ void Game::UpdatePlaying() {
     if (tileMap.TryGetPassableTileCenter(target, tileCenter)) {
       // move the player to where we clicked
       player.SetTarget(tileCenter);
+
     }
   }
 
   player.Update();
-
+  
   Vector2 playerPos = player.GetPosition();
+  
+  enemy.SetTarget(playerPos);
+  enemy.Update();
+
   float dt = GetFrameTime();
   float followSpeed = 5.0f;
 
@@ -247,15 +253,18 @@ void Game::DrawPlaying() {
   // clear
   ClearBackground(BLACK);
 
+  
   // set camera (things between begin and end are affected by the camera)
   BeginMode2D(camera);
-    // draw map
-    tileMap.Draw();
-    // draw player init position
-    player.Draw();
-  // restore normal screen
+  // draw map
+  tileMap.Draw();
+  // draw player init position
+  enemy.Draw();
+  player.Draw();
+    // restore normal screen
   EndMode2D();
-}
+
+  }
 
 // Handle pause menu hover/actions
 void Game::UpdatePauseMenu() {

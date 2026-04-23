@@ -3,6 +3,7 @@
 
 #include "raylib.h"
 #include "Player.h"
+#include "Enemy.h"
 #include "TileMap.h"
 #include <string>
 
@@ -50,6 +51,9 @@ private:
   // player and camera objects
   Player player;
   Camera2D camera;
+
+  // enemies
+  Enemy enemy;
 
   // tracking mouse in game (playing)
   Vector2 GetVirtualMouseWorld() const;
