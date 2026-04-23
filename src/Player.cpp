@@ -1,5 +1,6 @@
 #include "Player.h"
 #include <cmath>
+#include <iostream>
 
 // set player initial position
 Player::Player(float startX, float startY)
@@ -134,6 +135,13 @@ void Player::Update() {
 
   // animate walk frames
   animationTimer += dt;
+
+  
+std::cout << "animationTimer: " << animationTimer
+          << " | currentFrame: " << currentFrame
+          << " | walkFrameDir: " << walkFrameDir
+          << std::endl;
+
   if (animationTimer >= animationSpeed) {
     animationTimer = 0.0f;
 
@@ -145,7 +153,7 @@ void Player::Update() {
       walkFrameDir = -1;
     }
     else if (currentFrame <= 1) {
-      currentFrame = 0;
+      currentFrame = 1;
       walkFrameDir = 1;
     }
   }
