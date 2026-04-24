@@ -2,9 +2,10 @@
 #include <iostream>
 
 Enemy::Enemy(float startX, float startY)
-  : Character(startX, startY, "assets/player.png") {
-  speed = 120.0f;
-}
+  : Character(startX, startY) {
+    AddAnimation("idle", "assets/orc/Orc-Idle.png", 6, 100, 100, 0.20f);
+    AddAnimation("walk", "assets/orc/Orc-Walk.png",  8, 100, 100, 0.30f);
+  }
 
 void Enemy::UpdateToward(Vector2 target, const TileMap& tileMap) {
   Vector2 enemyPos = GetPosition();

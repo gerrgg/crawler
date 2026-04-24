@@ -3,11 +3,23 @@
 
 #include "raylib.h"
 #include "TileMap.h"
+
 #include <string>
+#include <unordered_map>
+
+struct Animation {
+  std::string path;
+  Texture2D texture;
+  int frames;
+  int frameWidth;
+  int frameHeight;
+  float speed;
+  bool loop;
+};
 
 class Character {
 public:
-  Character(float startX, float startY, const std::string& spritePath);
+  Character(float startX, float startY);
   virtual ~Character();
 
   Vector2 GetPosition() const;
@@ -15,10 +27,18 @@ public:
 
   virtual void Update();
   virtual void Draw();
-  virtual void DrawDebug() const;
 
-  static constexpr int frameWidth = 32;
-  static constexpr int frameHeight = 64;
+  void AddAnimation(
+    const std::string& name,
+    const std::string& path,
+    int frames,
+    int frameWidth,
+    int frameHeight,
+    float speed,
+    bool loop = true
+  );
+
+  void PlayAnimation(const std::string& name);
 
   int GetTileX(const TileMap& tileMap) const;
   int GetTileY(const TileMap& tileMap) const;
@@ -26,19 +46,18 @@ public:
 protected:
   Vector2 position;
   Vector2 moveTarget;
+
   float speed;
   float radius;
   bool movingToTarget;
 
-  Texture2D sprite;
+  std::unordered_map<std::string, Animation> animations;
+  std::string currentAnimation;
+
   float spriteScale;
 
   int currentFrame;
-  int currentRow;
   float animationTimer;
-  float animationSpeed;
-
-  int walkFrameDir;
 };
 
 #endif

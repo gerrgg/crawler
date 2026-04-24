@@ -50,6 +50,7 @@ private:
 
   // player and camera objects
   Player player;
+
   Camera2D camera;
 
   // enemies
