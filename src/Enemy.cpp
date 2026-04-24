@@ -2,7 +2,7 @@
 #include <iostream>
 
 Enemy::Enemy(float startX, float startY)
-  : Character(startX, startY, "assets/enemy.png") {
+  : Character(startX, startY, "assets/player.png") {
   speed = 120.0f;
 }
 
@@ -18,7 +18,7 @@ void Enemy::UpdateToward(Vector2 target, const TileMap& tileMap) {
   int distanceX = playerTileX - enemyTileX;
   int distanceY = playerTileY - enemyTileY;
 
-  // alreadistanceY 1 tile away
+  // already in position
   if( std::abs(distanceX) + std::abs(distanceY) <= 1 ){
     movingToTarget = false;
     return;

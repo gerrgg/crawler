@@ -22,6 +22,14 @@ Character::~Character() {
   }
 }
 
+int Character::GetTileX(const TileMap& tileMap) const {
+  return tileMap.WorldToTileX(position.x);
+}
+
+int Character::GetTileY(const TileMap& tileMap) const {
+  return tileMap.WorldToTileY(position.y);
+}
+
 Vector2 Character::GetPosition() const {
   return position;
 }

@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <iostream>
 #include <algorithm>
 
 Game::Game(int virtualWidth, int virtualHeight)
@@ -226,11 +227,27 @@ void Game::UpdatePlaying() {
     Vector2 target = GetVirtualMouseWorld();
     Vector2 tileCenter;
 
+    int clickedTileX = tileMap.WorldToTileX(target.x);
+    int clickedTileY = tileMap.WorldToTileY(target.y);
+
+    int enemyTileX = enemy.GetTileX(tileMap);
+    int enemyTileY = enemy.GetTileY(tileMap);
+    
+    if(clickedTileX == enemyTileX && clickedTileY == enemyTileY){
+      std::cout << "Attack enemy" << std::endl;
+      return;
+    }
+
     // check if we can go there 
     if (tileMap.TryGetPassableTileCenter(target, tileCenter)) {
-      // move the player to where we clicked
-      player.SetTarget(tileCenter);
+      int targetTileX = tileMap.WorldToTileX(tileCenter.x);
+      int targetTileY = tileMap.WorldToTileY(tileCenter.y);
 
+      if (targetTileX == enemyTileX && targetTileY == enemyTileY) {
+        return;
+      }
+
+      player.SetTarget(tileCenter);
     }
   }
 

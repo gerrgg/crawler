@@ -2,6 +2,7 @@
 #define CHARACTER_H
 
 #include "raylib.h"
+#include "TileMap.h"
 #include <string>
 
 class Character {
@@ -18,6 +19,9 @@ public:
 
   static constexpr int frameWidth = 32;
   static constexpr int frameHeight = 64;
+
+  int GetTileX(const TileMap& tileMap) const;
+  int GetTileY(const TileMap& tileMap) const;
 
 protected:
   Vector2 position;
