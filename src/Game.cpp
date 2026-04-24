@@ -235,11 +235,10 @@ void Game::UpdatePlaying() {
   }
 
   player.Update();
-  
+
   Vector2 playerPos = player.GetPosition();
-  
-  enemy.SetTarget(playerPos);
-  enemy.Update();
+
+  enemy.UpdateToward(playerPos, tileMap);
 
   float dt = GetFrameTime();
   float followSpeed = 5.0f;

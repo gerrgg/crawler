@@ -21,9 +21,10 @@ include_directories(include)
 add_executable(raylib_starter
   src/main.cpp
   src/Game.cpp
+  src/TileMap.cpp
+  src/Character.cpp
   src/Player.cpp
   src/Enemy.cpp
-  src/TileMap.cpp
 )
 
 target_link_libraries(raylib_starter PRIVATE raylib)
