@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "Debug.h";
 
 Enemy::Enemy(float startX, float startY)
   : Character(startX, startY) {
@@ -19,13 +20,20 @@ void Enemy::UpdateToward(Vector2 target, const TileMap& tileMap) {
   int distanceX = playerTileX - enemyTileX;
   int distanceY = playerTileY - enemyTileY;
 
+  DEBUG_LOG("enemy distance: " << "(x:" << std::abs(distanceX) << " y:" << std::abs(distanceY) << ")");
+
   // already in position
-  if( std::abs(distanceX) + std::abs(distanceY) <= 1 ){
+  if (std::abs(distanceX) + std::abs(distanceY) <= 1) {
+    if (movingToTarget) {
+      Update();
+      return;
+    }
+
     movingToTarget = false;
-    attacking =  true;
+    attacking = true;
     Update();
     return;
-  } 
+  }
 
   attacking = false;
 
@@ -53,7 +61,6 @@ void Enemy::UpdateToward(Vector2 target, const TileMap& tileMap) {
   }
 
   Vector2 adjustedTarget = tileMap.GetTileCenter(targetTileX, targetTileY);
-
   SetTarget(adjustedTarget);
   Update();
 }

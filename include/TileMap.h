@@ -43,6 +43,7 @@ public:
   
   void Draw() const;
   void DrawDebug() const;
+  void DrawHoveredTile(Vector2 worldMouse) const;
 
   bool IsTilePassable(int tile) const;
   bool IsWorldPositionPassable(Vector2 worldPos) const;

@@ -181,3 +181,9 @@ void Character::Update() {
     }
   }
 }
+
+void Character::SetPosition(Vector2 newPosition) {
+  position = newPosition;
+  moveTarget = newPosition;
+  movingToTarget = false;
+}

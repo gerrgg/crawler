@@ -27,6 +27,7 @@ public:
 
   virtual void Update();
   virtual void Draw();
+  void SetPosition(Vector2 newPosition);
 
   void AddAnimation(
     const std::string& name,

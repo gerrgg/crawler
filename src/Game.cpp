@@ -9,8 +9,15 @@ Game::Game(int virtualWidth, int virtualHeight)
     logoAlpha(0.0f),
     logoTimer(0.0f),
     pauseSelection(0),
-    enemy(virtualWidth / 2.0f + 64.0f, virtualHeight / 2.0f),
-    player(virtualWidth / 2.0f, virtualHeight / 2.0f) {
+    enemy(0.0f, 0.0f),
+    player(0.0f, 0.0f) {
+
+  Vector2 playerSpawn = tileMap.GetTileCenter(5, 5);
+  Vector2 enemySpawn = tileMap.GetTileCenter(11, 5);
+
+  player.SetPosition(playerSpawn);
+  enemy.SetPosition(enemySpawn);
+
   logo = LoadTexture("assets/logo.png");
   title = LoadTexture("assets/title_screen.png");
   shouldQuit = false;
@@ -242,6 +249,10 @@ void Game::DrawPlaying() {
   BeginMode2D(camera);
   // draw map
   tileMap.Draw();
+
+  Vector2 mouseWorld = GetVirtualMouseWorld();
+  tileMap.DrawHoveredTile(mouseWorld);
+
   // draw player init position
   enemy.Draw();
   player.Draw();

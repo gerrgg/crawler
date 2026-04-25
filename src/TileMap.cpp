@@ -129,6 +129,25 @@ void TileMap::DrawLayer(const Map& layer) const {
   }
 }
 
+void TileMap::DrawHoveredTile(Vector2 worldMouse) const {
+  int tileX = WorldToTileX(worldMouse.x);
+  int tileY = WorldToTileY(worldMouse.y);
+
+  if (!IsTileCoordinateInBounds(tileX, tileY)) {
+    return;
+  }
+
+  Rectangle tileRect = {
+    (float)(tileX * tileSize),
+    (float)(tileY * tileSize),
+    (float)tileSize,
+    (float)tileSize
+  };
+
+  DrawRectangleRec(tileRect, Fade(YELLOW, 0.25f));
+  DrawRectangleLinesEx(tileRect, 2.0f, YELLOW);
+}
+
 void TileMap::DrawDebug() const {
   DrawTexture(tileset, 0, 0, WHITE);
 
