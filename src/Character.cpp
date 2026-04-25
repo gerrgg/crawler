@@ -1,5 +1,6 @@
 #include "Character.h"
 #include <cmath>
+#include <iostream>
 
 Character::Character(float startX, float startY)
   : position{ startX, startY },
@@ -10,6 +11,8 @@ Character::Character(float startX, float startY)
     currentAnimation(""),
     spriteScale(2.0f),
     currentFrame(0),
+    facingRight(true),
+    attacking(false),
     animationTimer(0.0f) {}
 
 Character::~Character() {
@@ -100,6 +103,10 @@ void Character::Draw() {
     dest.height / 2.0f
   };
 
+  if( ! facingRight){
+    source.width = -source.width;
+  }
+
   DrawTexturePro(
     animation.texture,
     source,
@@ -126,18 +133,35 @@ void Character::Update() {
     if (distance < 2.0f) {
       position = moveTarget;
       movingToTarget = false;
-      PlayAnimation("idle");
+      
+       std::cout
+        << "character: " << GetClassName()
+        << " | attacking: " << attacking
+        << std::endl;
+
+      if( ! attacking ){
+        PlayAnimation("idle");
+      } else {
+        PlayAnimation("attack");
+      }
     } else {
       Vector2 direction = {
         toTarget.x / distance,
         toTarget.y / distance
       };
 
+      // flip directions
+      facingRight = direction.x > 0;
+
       position.x += direction.x * speed * dt;
       position.y += direction.y * speed * dt;
     }
   } else {
-    PlayAnimation("idle");
+    if (attacking) {
+      PlayAnimation("attack");
+    } else {
+      PlayAnimation("idle");
+    }
   }
 
   Animation& animation = animations[currentAnimation];
@@ -154,21 +178,3 @@ void Character::Update() {
     }
   }
 }
-
-// void Character::DrawDebug() const {
-//   DrawTexture(sprite, 0, 0, WHITE);
-
-//   int tilesPerRow = sprite.width / frameWidth;
-//   int tilesPerCol = sprite.height / frameHeight;
-
-//   for (int y = 0; y < tilesPerCol; y++) {
-//     for (int x = 0; x < tilesPerRow; x++) {
-//       int drawX = x * frameWidth;
-//       int drawY = y * frameHeight;
-//       int index = y * tilesPerRow + x;
-
-//       DrawRectangleLines(drawX, drawY, frameWidth, frameHeight, RED);
-//       DrawText(TextFormat("%d", index), drawX + 4, drawY + 4, 10, YELLOW);
-//     }
-//   }
-// }

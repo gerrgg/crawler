@@ -6,6 +6,10 @@
 class Player : public Character {
 public:
   Player(float startX, float startY);
+
+  std::string GetClassName() const override {
+    return "Player";
+  }
 };
 
 #endif

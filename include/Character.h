@@ -38,6 +38,10 @@ public:
     bool loop = true
   );
 
+  virtual std::string GetClassName() const {
+    return "Character";
+  }
+
   void PlayAnimation(const std::string& name);
 
   int GetTileX(const TileMap& tileMap) const;
@@ -58,6 +62,9 @@ protected:
 
   int currentFrame;
   float animationTimer;
+
+  bool facingRight;
+  bool attacking;
 };
 
 #endif

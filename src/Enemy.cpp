@@ -4,7 +4,8 @@
 Enemy::Enemy(float startX, float startY)
   : Character(startX, startY) {
     AddAnimation("idle", "assets/orc/Orc-Idle.png", 6, 100, 100, 0.20f);
-    AddAnimation("walk", "assets/orc/Orc-Walk.png",  8, 100, 100, 0.30f);
+    AddAnimation("walk", "assets/orc/Orc-Walk.png",  8, 100, 100, 0.24f);
+    AddAnimation("attack", "assets/orc/Orc-Attack01.png",  6, 100, 100, 0.24f);
   }
 
 void Enemy::UpdateToward(Vector2 target, const TileMap& tileMap) {
@@ -22,8 +23,12 @@ void Enemy::UpdateToward(Vector2 target, const TileMap& tileMap) {
   // already in position
   if( std::abs(distanceX) + std::abs(distanceY) <= 1 ){
     movingToTarget = false;
+    attacking =  true;
+    Update();
     return;
-  }
+  } 
+
+  attacking = false;
 
   // set
   int targetTileX = playerTileX;
@@ -50,7 +55,6 @@ void Enemy::UpdateToward(Vector2 target, const TileMap& tileMap) {
 
   Vector2 adjustedTarget = tileMap.GetTileCenter(targetTileX, targetTileY);
 
-  std::cout << "X:" << target.x << std::endl << "Y:" << target.y << std::endl;
   SetTarget(adjustedTarget);
   Update();
 }

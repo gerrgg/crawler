@@ -9,6 +9,10 @@ public:
   Enemy(float startX, float startY);
 
   void UpdateToward(Vector2 target, const TileMap& tileMap);
+
+  std::string GetClassName() const override {
+    return "Enemy";
+  }
 };
 
 #endif
