@@ -13,6 +13,8 @@ Character::Character(float startX, float startY)
     currentFrame(0),
     facingRight(true),
     attacking(false),
+    dead(false),
+    hurt(false),
     animationTimer(0.0f) {}
 
 Character::~Character() {
@@ -133,6 +135,28 @@ void Character::FaceTarget(Vector2 target) {
 void Character::Update() {
   float dt = GetFrameTime();
 
+  if (dead || hurt) {
+    Animation& animation = animations[currentAnimation];
+
+    animationTimer += dt;
+
+    if (animationTimer >= animation.speed) {
+      animationTimer = 0.0f;
+      currentFrame++;
+
+      if (currentFrame >= animation.frames) {
+        if (dead) {
+          currentFrame = animation.frames - 1;
+        } else {
+          hurt = false;
+          PlayAnimation("idle");
+        }
+      }
+    }
+
+    return;
+  }
+
   if (movingToTarget) {
     FaceTarget(moveTarget);
 
@@ -163,22 +187,11 @@ void Character::Update() {
     PlayAnimation(attacking ? "attack" : "idle");
   }
 
-  Animation& animation = animations[currentAnimation];
+  UpdateAnimationFrames();
 
-  animationTimer += dt;
-
-  if (animationTimer >= animation.speed) {
-    animationTimer = 0.0f;
-    currentFrame++;
-
-    if (currentFrame >= animation.frames) {
-      if (currentAnimation == "attack") {
-        attacking = false;
-        PlayAnimation("idle");
-      } else {
-        currentFrame = animation.loop ? 0 : animation.frames - 1;
-      }
-    }
+  if (currentAnimation == "attack" && currentFrame >= animations[currentAnimation].frames - 1) {
+    attacking = false;
+    PlayAnimation("idle");
   }
 }
 
@@ -186,4 +199,25 @@ void Character::SetPosition(Vector2 newPosition) {
   position = newPosition;
   moveTarget = newPosition;
   movingToTarget = false;
+}
+
+void Character::UpdateAnimationFrames() {
+  if (currentAnimation.empty()) {
+    return;
+  }
+
+  Animation& animation = animations[currentAnimation];
+
+  animationTimer += GetFrameTime();
+
+  if (animationTimer < animation.speed) {
+    return;
+  }
+
+  animationTimer = 0.0f;
+  currentFrame++;
+
+  if (currentFrame >= animation.frames) {
+    currentFrame = animation.loop ? 0 : animation.frames - 1;
+  }
 }

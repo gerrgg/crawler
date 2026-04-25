@@ -255,6 +255,8 @@ void Game::DrawPlaying() {
 
   // draw player init position
   enemy.Draw();
+  enemy.DrawHealthBar();
+
   player.Draw();
     // restore normal screen
   EndMode2D();

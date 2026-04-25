@@ -51,6 +51,15 @@ public:
   int GetTileX(const TileMap& tileMap) const;
   int GetTileY(const TileMap& tileMap) const;
 
+  int health = 100;
+  int maxHealth = 100;
+
+  void DrawHealthBar() const;
+  void TakeDamage(int damage);
+
+protected:
+  void UpdateAnimationFrames();
+
 protected:
   Vector2 position;
   Vector2 moveTarget;
@@ -69,6 +78,9 @@ protected:
 
   bool facingRight;
   bool attacking;
+
+  bool dead;
+  bool hurt;
 };
 
 #endif

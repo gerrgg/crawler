@@ -1,5 +1,5 @@
 #include "Player.h"
-#include "Debug.h";
+#include "Debug.h"
 
 Player::Player(float startX, float startY)
   : Character(startX, startY) {
@@ -25,6 +25,8 @@ Player::Player(float startX, float startY)
     movingToTarget = false;
     attacking = true;
     PlayAnimation("attack");
+
+    enemy.TakeDamage(20);
 
     DEBUG_LOG("Attack Enemy");
   }
