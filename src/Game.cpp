@@ -213,7 +213,6 @@ bool Game::MakeButton(const std::string& text, Rectangle rect, bool selected) {
 
 // running game
 void Game::UpdatePlaying() {
-
   // open pause
   if (IsKeyPressed(KEY_ESCAPE)) {
     pauseSelection = 0;
@@ -221,40 +220,10 @@ void Game::UpdatePlaying() {
     return;
   }
 
-  // on click
-  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-    // get where we clicked
-    Vector2 target = GetVirtualMouseWorld();
-    Vector2 tileCenter;
-
-    int clickedTileX = tileMap.WorldToTileX(target.x);
-    int clickedTileY = tileMap.WorldToTileY(target.y);
-
-    int enemyTileX = enemy.GetTileX(tileMap);
-    int enemyTileY = enemy.GetTileY(tileMap);
-    
-    if(clickedTileX == enemyTileX && clickedTileY == enemyTileY){
-      std::cout << "Attack enemy" << std::endl;
-      return;
-    }
-
-    // check if we can go there 
-    if (tileMap.TryGetPassableTileCenter(target, tileCenter)) {
-      int targetTileX = tileMap.WorldToTileX(tileCenter.x);
-      int targetTileY = tileMap.WorldToTileY(tileCenter.y);
-
-      if (targetTileX == enemyTileX && targetTileY == enemyTileY) {
-        return;
-      }
-
-      player.SetTarget(tileCenter);
-    }
-  }
-
+  HandlePlayerInput();
   player.Update();
 
   Vector2 playerPos = player.GetPosition();
-
   enemy.UpdateToward(playerPos, tileMap);
 
   float dt = GetFrameTime();
@@ -269,7 +238,6 @@ void Game::DrawPlaying() {
   // clear
   ClearBackground(BLACK);
 
-  
   // set camera (things between begin and end are affected by the camera)
   BeginMode2D(camera);
   // draw map
@@ -382,6 +350,55 @@ Vector2 Game::GetVirtualMouse() const {
   mouse.y = (mouse.y - offsetY) / scale;
 
   return mouse;
+}
+
+void Game::HandlePlayerInput() {
+  if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    return;
+  }
+
+  Vector2 clickWorld = GetVirtualMouseWorld();
+
+  Enemy* clickedEnemy = GetEnemyAtWorldPosition(clickWorld);
+
+  if (clickedEnemy) {
+    player.Attack(*clickedEnemy);
+    return;
+  }
+
+  Vector2 tileCenter;
+
+  if (!tileMap.TryGetPassableTileCenter(clickWorld, tileCenter)) {
+    return;
+  }
+
+  if (IsEnemyAtTile(tileCenter)) {
+    return;
+  }
+
+  player.MoveTo(tileCenter);
+}
+
+Enemy* Game::GetEnemyAtWorldPosition(Vector2 worldPos) {
+  int clickedTileX = tileMap.WorldToTileX(worldPos.x);
+  int clickedTileY = tileMap.WorldToTileY(worldPos.y);
+
+  int enemyTileX = enemy.GetTileX(tileMap);
+  int enemyTileY = enemy.GetTileY(tileMap);
+
+  if (clickedTileX == enemyTileX && clickedTileY == enemyTileY) {
+    return &enemy;
+  }
+
+  return nullptr;
+}
+
+bool Game::IsEnemyAtTile(Vector2 tileCenter) {
+  int tileX = tileMap.WorldToTileX(tileCenter.x);
+  int tileY = tileMap.WorldToTileY(tileCenter.y);
+
+  return tileX == enemy.GetTileX(tileMap)
+    && tileY == enemy.GetTileY(tileMap);
 }
 
 // TODO

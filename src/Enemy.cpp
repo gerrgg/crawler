@@ -1,11 +1,10 @@
 #include "Enemy.h"
-#include <iostream>
 
 Enemy::Enemy(float startX, float startY)
   : Character(startX, startY) {
     AddAnimation("idle", "assets/orc/Orc-Idle.png", 6, 100, 100, 0.20f);
     AddAnimation("walk", "assets/orc/Orc-Walk.png",  8, 100, 100, 0.24f);
-    AddAnimation("attack", "assets/orc/Orc-Attack01.png",  6, 100, 100, 0.24f);
+    AddAnimation("attack", "assets/orc/Orc-Attack01.png",  6, 100, 100, 0.18f);
   }
 
 void Enemy::UpdateToward(Vector2 target, const TileMap& tileMap) {

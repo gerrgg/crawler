@@ -66,6 +66,11 @@ private:
   bool MakeButton(const std::string& text, Rectangle rect, bool selected);
   Rectangle MakeCenteredButtonRect(float y, float width, float height);
 
+  // input
+  void HandlePlayerInput();
+  Enemy* GetEnemyAtWorldPosition(Vector2 worldPos);
+  bool IsEnemyAtTile(Vector2 tileCenter);
+
   // logo
   void DrawLogo();
   void UpdateLogo();

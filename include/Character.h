@@ -42,7 +42,10 @@ public:
     return "Character";
   }
 
+  void FaceTarget(Vector2 target);
+
   void PlayAnimation(const std::string& name);
+  bool IsBusy() const;
 
   int GetTileX(const TileMap& tileMap) const;
   int GetTileY(const TileMap& tileMap) const;

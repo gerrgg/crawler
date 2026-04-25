@@ -1,6 +1,6 @@
+#include "Debug.h"
 #include "Character.h"
 #include <cmath>
-#include <iostream>
 
 Character::Character(float startX, float startY)
   : position{ startX, startY },
@@ -46,6 +46,10 @@ void Character::AddAnimation(
   }
 }
 
+bool Character::IsBusy() const {
+  return attacking && currentAnimation == "attack";
+}
+
 void Character::PlayAnimation(const std::string& name) {
   if (currentAnimation == name) {
     return;
@@ -59,6 +63,7 @@ void Character::PlayAnimation(const std::string& name) {
   currentFrame = 0;
   animationTimer = 0.0f;
 }
+
 
 int Character::GetTileX(const TileMap& tileMap) const {
   return tileMap.WorldToTileX(position.x);
@@ -117,10 +122,20 @@ void Character::Draw() {
   );
 }
 
+void Character::FaceTarget(Vector2 target) {
+  float dx = target.x - position.x;
+
+  if (std::abs(dx) > 1.0f) {
+    facingRight = dx > 0;
+  }
+}
+
 void Character::Update() {
   float dt = GetFrameTime();
 
   if (movingToTarget) {
+    FaceTarget(moveTarget);
+
     PlayAnimation("walk");
 
     Vector2 toTarget = {
@@ -133,35 +148,19 @@ void Character::Update() {
     if (distance < 2.0f) {
       position = moveTarget;
       movingToTarget = false;
-      
-       std::cout
-        << "character: " << GetClassName()
-        << " | attacking: " << attacking
-        << std::endl;
 
-      if( ! attacking ){
-        PlayAnimation("idle");
-      } else {
-        PlayAnimation("attack");
-      }
+      PlayAnimation(attacking ? "attack" : "idle");
     } else {
       Vector2 direction = {
         toTarget.x / distance,
         toTarget.y / distance
       };
 
-      // flip directions
-      facingRight = direction.x > 0;
-
       position.x += direction.x * speed * dt;
       position.y += direction.y * speed * dt;
     }
   } else {
-    if (attacking) {
-      PlayAnimation("attack");
-    } else {
-      PlayAnimation("idle");
-    }
+    PlayAnimation(attacking ? "attack" : "idle");
   }
 
   Animation& animation = animations[currentAnimation];
@@ -170,11 +169,15 @@ void Character::Update() {
 
   if (animationTimer >= animation.speed) {
     animationTimer = 0.0f;
-
     currentFrame++;
 
     if (currentFrame >= animation.frames) {
-      currentFrame = animation.loop ? 0 : animation.frames - 1;
+      if (currentAnimation == "attack") {
+        attacking = false;
+        PlayAnimation("idle");
+      } else {
+        currentFrame = animation.loop ? 0 : animation.frames - 1;
+      }
     }
   }
 }
