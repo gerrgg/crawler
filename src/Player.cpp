@@ -14,7 +14,7 @@ Player::Player(float startX, float startY)
     SetTarget(target);
   }
 
-
+ 
   void Player::Attack(Enemy& enemy) {
     if (IsBusy()) {
       return;

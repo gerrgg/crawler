@@ -11,6 +11,11 @@ Enemy::Enemy(float startX, float startY)
   }
 
 void Enemy::UpdateToward(Vector2 target, const TileMap& tileMap) {
+  if(dead || hurt){
+    Update();
+    return;
+  }
+
   Vector2 enemyPos = GetPosition();
 
   int playerTileX = tileMap.WorldToTileX(target.x);

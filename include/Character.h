@@ -28,7 +28,7 @@ struct Animation {
 class Character {
 public:
   /**
-   * Creates a character at a define position in the world
+   * Creates a character at a defined position in the world
    * 
    * @param startX Starting X position in world
    * @param startY Starting Y position in world
