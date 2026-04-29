@@ -98,6 +98,7 @@ void Enemy::Update() {
     if (currentFrame >= animation.frames - 1) {
       if (dead) {
         currentFrame = animation.frames - 1;
+        
       } else {
         hurt = false;
         PlayAnimation("idle");
