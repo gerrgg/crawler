@@ -13,7 +13,7 @@ Game::Game(int virtualWidth, int virtualHeight)
     player(0.0f, 0.0f) {
 
   Vector2 playerSpawn = tileMap.GetTileCenter(5, 5);
-  Vector2 enemySpawn = tileMap.GetTileCenter(11, 5);
+  Vector2 enemySpawn = tileMap.GetTileCenter(31, 5);
 
   player.SetPosition(playerSpawn);
   enemy.SetPosition(enemySpawn);

@@ -7,7 +7,7 @@
 class TileMap {
 public:
   static constexpr int tileSize = 32;
-  static constexpr int mapWidth = 16 * 10;
+  static constexpr int mapWidth = 24;
   static constexpr int mapHeight = 12;
 
   using Map = std::array<std::array<int, mapWidth>, mapHeight>;
