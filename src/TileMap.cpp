@@ -26,6 +26,7 @@ void TileMap::Draw() const {
   DrawLayer(decorMap);
 }
 
+// map specific tilesets to areas of the grid
 int TileMap::GetDefaultTile(int x, int y) const {
   if (x == 0 && y == 0) return TILE_WALL_TOP_LEFT;
   if (x == mapWidth - 1 && y == 0) return TILE_WALL_TOP_RIGHT;
@@ -40,13 +41,17 @@ int TileMap::GetDefaultTile(int x, int y) const {
   return TILE_FLOOR_DIRT;
 }
 
+// checks all tiles within a radius and 
 bool TileMap::HasNearbyDecoration(int tileX, int tileY, int radius) const {
   for (int y = tileY - radius; y <= tileY + radius; y++) {
     for (int x = tileX - radius; x <= tileX + radius; x++) {
+
+      // out of bounds
       if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight) {
         continue;
       }
 
+      // tile is not empty
       if (decorMap[y][x] != TILE_EMPTY) {
         return true;
       }
@@ -56,6 +61,7 @@ bool TileMap::HasNearbyDecoration(int tileX, int tileY, int radius) const {
   return false;
 }
 
+// returns a random decoration tile
 int TileMap::GetRandomDecorTile() const {
   int roll = GetRandomValue(0, 5);
 
@@ -69,6 +75,7 @@ int TileMap::GetRandomDecorTile() const {
     default: return TILE_PLANT;
   }
 }
+
 
 void TileMap::GenerateDecor(int offset, int radius) {
   for (int y = 0; y < mapHeight; y++) {
